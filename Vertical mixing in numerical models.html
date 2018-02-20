@@ -11825,20 +11825,28 @@ $$</p>
     <div class="input_area">
 <div class=" highlight hl-julia"><pre><span></span><span class="k">using</span> <span class="n">Plots</span><span class="p">;</span>
 
-<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># time step = 0.1 second</span>
-<span class="n">run_time</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>  <span class="c"># how long the model should simulate in seconds</span>
-<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  <span class="c"># how many steps the model needs to take. </span>
-                                       <span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float </span>
-                                       <span class="c"># to integer (or the indexing in the for loop fails)</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>  <span class="c"># set up an array to hold the concentration in both boxes over the modeled time</span>
-<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  <span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
-<span class="n">k</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># mixing rate constant in s^{-1}</span>
+<span class="c"># time step = 0.1 second</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="c"># how long the model should simulate in seconds</span>
+<span class="n">run_time</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>  
+<span class="c"># how many steps the model needs to take. </span>
+<span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float to integer (or the indexing in the for loop fails)</span>
+<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  
+
+
+<span class="c"># set up an array to hold the concentration in both boxes over the modeled time</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>  
+<span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
+<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  
+<span class="c"># mixing rate constant in s^{-1}</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
 <span class="k">for</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">nsteps</span>
-    <span class="n">dc_dt</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]);</span>  <span class="c"># calculate the change in concentration at timestep i</span>
-    <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>  <span class="c"># calculate the box 1 concentration at the next timestep, </span>
-                                       <span class="c"># assuming dc_dt is constant over the timestep</span>
-    <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>  <span class="c"># calculate the box 2 concentration at the next timestep, </span>
-                                       <span class="c"># remembering dc_2/dt = - dc_1/dt</span>
+    <span class="c"># calculate the change in concentration at timestep i</span>
+    <span class="n">dc_dt</span> <span class="o">=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="mi">2</span><span class="p">]);</span>  
+    <span class="c"># calculate the box 1 concentration at the next timestep, assuming dc_dt is constant over the timestep</span>
+    <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>
+    <span class="c"># calculate the box 2 concentration at the next timestep, remembering dc_2/dt = - dc_1/dt</span>
+    <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>
 <span class="k">end</span>
 
 <span class="n">time_vector</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">:</span><span class="n">nsteps</span><span class="p">)</span><span class="o">*</span><span class="n">dt</span><span class="p">;</span>
@@ -12465,28 +12473,34 @@ $$</p>
 <div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># time step = 0.1 second</span>
-<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>  <span class="c"># how long the model should simulate in seconds</span>
-<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  <span class="c"># how many steps the model needs to take. </span>
-                                       <span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float </span>
-                                       <span class="c"># to integer (or the indexing in the for loop fails)</span>
-<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>  <span class="c"># how many boxes to include in the model</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>  <span class="c"># set up an array to hold the concentration in both boxes over the modeled time</span>
-<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  <span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
-<span class="n">k</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># mixing rate constant in s^{-1}</span>
+<div class=" highlight hl-julia"><pre><span></span><span class="c"># time step = 0.1 second</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="c"># how long the model should simulate in seconds</span>
+<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+<span class="c"># how many steps the model needs to take. </span>
+<span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float to integer (or the indexing in the for loop fails)</span>
+<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  
+ <span class="c"># how many boxes to include in the model</span>
+<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="c"># set up an array to hold the concentration in all boxes over the modeled time</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>
+<span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
+<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>
+<span class="c"># mixing rate constant in s^{-1}</span>
+<span class="n">k</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  
 <span class="k">for</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">nsteps</span>
     <span class="k">for</span> <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">:</span><span class="n">nboxes</span>
         <span class="n">dc_dt</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span>
-            <span class="n">dc_dt</span> <span class="o">+=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]);</span> <span class="c"># calculate the change in concentration at timestep n due to the box </span>
-                                             <span class="c"># below as long as we&#39;re not in the bottom box</span>
+            <span class="c"># calculate the change in concentration at timestep n due to the box below as long as we&#39;re not in the bottom box</span>
+            <span class="n">dc_dt</span> <span class="o">+=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]);</span> 
         <span class="k">end</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">nboxes</span>
-            <span class="n">dc_dt</span> <span class="o">+=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span> <span class="c"># calculate the change in concentration at timestep n due to the box </span>
-                                             <span class="c"># above as long as we&#39;re not in the top box</span>
+            <span class="c"># calculate the change in concentration at timestep n due to the box above as long as we&#39;re not in the top box</span>
+            <span class="n">dc_dt</span> <span class="o">+=</span> <span class="o">-</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span> 
         <span class="k">end</span>
-        <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>  <span class="c"># calculate the box i concentration at the next timestep, </span>
-                                           <span class="c"># assuming dc_dt is constant over the timestep</span>
+        <span class="c"># calculate the box i concentration at the next timestep, assuming dc_dt is constant over the timestep</span>
+        <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">c</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">dc_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">;</span>  
     <span class="k">end</span>
 <span class="k">end</span>
 
@@ -17874,18 +17888,25 @@ $$</p>
 <div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-julia"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># time step = 0.1 second</span>
-<span class="n">dx</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>  <span class="c"># box width in meters</span>
-<span class="n">D</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span>  <span class="c"># diffusion constant in m^2/s. Calculate the D equivalent to our old k for given dx </span>
+<div class=" highlight hl-julia"><pre><span></span><span class="c"># time step = 0.1 second</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="c"># box width in meters</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+<span class="c"># diffusion constant in m^2/s. Calculate the D equivalent to our old k for given dx </span>
+<span class="n">D</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span>  
 
-<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>  <span class="c"># how long the model should simulate in seconds</span>
-<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  <span class="c"># how many steps the model needs to take. </span>
-                                       <span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float </span>
-                                       <span class="c"># to integer (or the indexing in the for loop fails)</span>
+<span class="c"># how long the model should simulate in seconds</span>
+<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+<span class="c"># how many steps the model needs to take. </span>
+<span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float to integer (or the indexing in the for loop fails)</span>
+<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  
 
-<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>  <span class="c"># how many boxes to include in the model</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>  <span class="c"># set up an array to hold the concentration in all boxes over the modeled time.</span>
-<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  <span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
+<span class="c"># how many boxes to include in the model</span>
+<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="c"># set up an array to hold the concentration in all boxes over the modeled time.</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>
+<span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
+<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  
 <span class="c"># Boundary conditions</span>
 <span class="n">bottom_bc</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
 <span class="n">top_bc</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">;</span>
@@ -23214,19 +23235,26 @@ $$</p>
     <span class="k">return</span> <span class="n">vcat</span><span class="p">(</span><span class="n">bc_bottom</span><span class="p">,</span> <span class="n">c_vec</span><span class="p">,</span> <span class="n">bc_top</span><span class="p">)</span>
 <span class="k">end</span>
 
-<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>  <span class="c"># time step = 0.1 second</span>
-<span class="n">dx</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>  <span class="c"># box width in meters</span>
-<span class="n">D</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span>  <span class="c"># diffusion constant in m^2/s. Calculate the D equivalent to our old k for given dx </span>
+<span class="c"># time step = 0.1 second</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">;</span>
+<span class="c"># box width in meters</span>
+<span class="n">dx</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span>
+<span class="c"># diffusion constant in m^2/s. Calculate the D equivalent to our old k for given dx</span>
+<span class="n">D</span> <span class="o">=</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">dx</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span>  
 
-<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>  <span class="c"># how long the model should simulate in seconds</span>
-<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  <span class="c"># how many steps the model needs to take. </span>
-                                       <span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float </span>
-                                       <span class="c"># to integer (or the indexing in the for loop fails)</span>
+<span class="c"># how long the model should simulate in seconds</span>
+<span class="n">run_time</span> <span class="o">=</span> <span class="mi">500</span><span class="p">;</span>
+<span class="c"># how many steps the model needs to take. </span>
+<span class="c"># Julia is a bit picky about types compared to Matlab, so convert from float to integer (or the indexing in the for loop fails)</span>
+<span class="n">nsteps</span> <span class="o">=</span> <span class="nb">convert</span><span class="p">(</span><span class="kt">Int64</span><span class="p">,</span> <span class="n">run_time</span><span class="o">/</span><span class="n">dt</span><span class="p">);</span>  
 
-<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>  <span class="c"># how many boxes to include in the model</span>
-<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>  <span class="c"># set up an array to hold the concentration in all boxes over the modeled time.</span>
-<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  <span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
-<span class="c"># Boundary conditions - set to no flux</span>
+<span class="c"># how many boxes to include in the model</span>
+<span class="n">nboxes</span> <span class="o">=</span> <span class="mi">10</span><span class="p">;</span>
+<span class="c"># set up an array to hold the concentration in all boxes over the modeled time.</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">nsteps</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nboxes</span><span class="p">);</span>
+<span class="c"># initial condition: box 1 has a concentration of 10.0 (arbitrary units) and box 2 has nothing</span>
+<span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">;</span>  
+<span class="c"># Boundary conditions - set to no flux through either boundary</span>
 <span class="n">bottom_bc</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
 <span class="n">top_bc</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
 
